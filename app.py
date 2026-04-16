@@ -11,7 +11,7 @@ ZAPI_URL = "https://api.z-api.io/instances/3F1B93ED5CDD8251D0D10E5C90DD1B0B/toke
 @app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.json
-    print("🔥 RECEBIDO:", data)
+    print("🔥 RECEBIDO:", data,flush=True)
 
     # Captura a mensagem de diferentes estruturas possíveis da Z-API
     mensagem = ""
@@ -27,7 +27,7 @@ def webhook():
     # Tenta pegar o telefone de 'phone' ou 'sender' (padrão Z-API)
     telefone = data.get("phone") or data.get("sender")
 
-    print(f"📩 MENSAGEM: {mensagem} | 📞 TELEFONE: {telefone}")
+    print(f"📩 MENSAGEM: {mensagem} | 📞 TELEFONE: {telefone}",flush=True)
 
     if "oi" in mensagem:
 
@@ -64,10 +64,10 @@ def webhook():
                 "message": resposta
             })
 
-            print(f"Status Z-API: {response.status_code} - {response.text}")
+            print(f"Status Z-API: {response.status_code} - {response.text}",flush=True)
 
         except Exception as e:
-            print("❌ Erro ao enviar mensagem:", e)
+            print("❌ Erro ao enviar mensagem:", e,flush=True)
 
     return jsonify({"status": "ok"})
 
