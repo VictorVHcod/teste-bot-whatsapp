@@ -1,24 +1,30 @@
 from flask import Flask, request, jsonify
+import os
 
 app = Flask(__name__)
-
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.json
 
-    mensagem = data.get("text", {}).get("message", "") or ""
-    mensagem = mensagem.lower()
+    print(data)
+
+    mensagem = (
+        data.get("message") or
+        data.get("body") or
+        data.get("text", {}).get("message") or
+        ""
+    ).lower()
+
     telefone = data.get("phone")
 
     if "oi" in mensagem:
         resposta = """
-        Oi! Tudo bem? Como posso te ajudar ?
+Oi! Tudo bem? Como posso te ajudar ?
 
-        [1] - Agendamento
-        [2] - dúvida
-
-        """
+[1] - Agendamento
+[2] - dúvida
+"""
     elif mensagem == "1":
         resposta = "Qual data deseja agendar?"
     elif mensagem == "2":
@@ -31,7 +37,6 @@ def webhook():
         "message": resposta
     })
 
-import os
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
