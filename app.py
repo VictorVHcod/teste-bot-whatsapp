@@ -7,15 +7,15 @@ app = Flask(__name__)
 def webhook():
     data = request.json
 
-    print(data)
+    print("recebido: ", data)
 
     mensagem = (
         data.get("message") or
         data.get("body") or
         data.get("text", {}).get("message") or
         ""
-    ).lower()
-
+    ).strip().lower()
+    print("Mensagem: ", mensagem)
     telefone = data.get("phone")
 
     if "oi" in mensagem:
