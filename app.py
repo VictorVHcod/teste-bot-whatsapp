@@ -4,94 +4,69 @@ import requests
 
 app = Flask(__name__)
 
-
 ZAPI_URL = "https://api.z-api.io/instances/3F1B93ED5CDD8251D0D10E5C90DD1B0B/token/65FB9421040863A98C3B5FAE/send-text"
 
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.json
-    print("🔥 RECEBIDO:", data,flush=True)
+    print("🔥 RECEBIDO:", data, flush=True)
+
+    if not data:
+        return jsonify({"status": "no data"}), 200
 
 
-    mensagem = ""
-    if data:
-        text_data = data.get("text", {})
-        mensagem = (
-                data.get("message")
-                or data.get("body")
-                or (text_data.get("message") if isinstance(text_data, dict) else None)
-                or ""
-        ).strip().lower()
+    text_data = data.get("text", {})
+    mensagem = (
+            data.get("message")
+            or data.get("body")
+            or (text_data.get("message") if isinstance(text_data, dict) else None)
+            or ""
+    ).strip().lower()
+
 
     telefone = data.get("phone") or data.get("sender")
 
-    print(f"📩 MENSAGEM: {mensagem} | 📞 TELEFONE: {telefone}",flush=True)
+    if not telefone:
+        return jsonify({"status": "no phone"}), 200
+
+    telefone_limpo = str(telefone).split("@")[0]
+    print(f"📩 MENSAGEM: {mensagem} | 📞 TELEFONE: {telefone_limpo}", flush=True)
+
 
     if "oi" in mensagem:
-
         resposta = "Oi! Tudo bem? Como posso te ajudar?\n\n[1] - Agendamento\n[2] - Dúvida"
-
-
-
     elif mensagem == "1":
-
         resposta = "Qual data você deseja agendar?"
-
-
-
     elif mensagem == "2":
-
         resposta = "É apenas um estudo de programador, TMJ 😄"
-
-
-
     else:
-
         resposta = "Não entendi 😅 Responda:\n[1] Agendamento\n[2] Dúvida"
 
 
-    if telefone:
+    try:
 
-        telefone_limpo = str(telefone).split("@")[0]
+        headers = {
+            "Content-Type": "application/json",
+            "Client-Token": "65FB9421040863A98C3B5FAE"
+        }
 
+        payload = {
+            "phone": telefone_limpo,
+            "message": resposta
+        }
 
-        if "-" in telefone_limpo:
-            print(f"Ignorando grupo: {telefone_limpo}", flush=True)
-            return jsonify({"status": "ok"})
+        print(f"Enviando para Z-API...", flush=True)
+        response = requests.post(ZAPI_URL, json=payload, headers=headers)
+        print(f"Status Z-API: {response.status_code} - {response.text}", flush=True)
 
-        try:
-            print(f"Enviando resposta para {telefone_limpo}...", flush=True)
+    except Exception as e:
+        print("❌ Erro no requests:", e, flush=True)
 
-
-            token_seguranca = "65FB9421040863A98C3B5FAE"
-
-
-            headers = {
-                "Content-Type": "application/json",
-                "Client-Token": token_seguranca
-            }
-
-
-            response = requests.post(
-                ZAPI_URL,
-                json={
-                    "phone": telefone_limpo,
-                    "message": resposta
-                },
-                headers=headers  # <--- ESSA É A CHAVE!
-            )
-
-            print(f"Status Z-API: {response.status_code} - {response.text}", flush=True)
-
-        except Exception as e:
-            print("❌ Erro ao enviar mensagem:", e, flush=True)
+    return jsonify({"status": "ok"}), 200
 
 
 if __name__ == "__main__":
-    app.run(
-        host="0.0.0.0",
-        port=int(os.environ.get("PORT", 5000))
-    )
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
 
 
