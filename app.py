@@ -13,7 +13,7 @@ def webhook():
     data = request.json
     print("🔥 RECEBIDO:", data,flush=True)
 
-    # Captura a mensagem de diferentes estruturas possíveis da Z-API
+
     mensagem = ""
     if data:
         text_data = data.get("text", {})
@@ -24,7 +24,6 @@ def webhook():
                 or ""
         ).strip().lower()
 
-    # Tenta pegar o telefone de 'phone' ou 'sender' (padrão Z-API)
     telefone = data.get("phone") or data.get("sender")
 
     print(f"📩 MENSAGEM: {mensagem} | 📞 TELEFONE: {telefone}",flush=True)
@@ -51,25 +50,42 @@ def webhook():
 
         resposta = "Não entendi 😅 Responda:\n[1] Agendamento\n[2] Dúvida"
 
+
     if telefone:
-        # Garante que o telefone está no formato string e sem @c.us se existir
-        telefone = str(telefone).split("@")[0]
+
+        telefone_limpo = str(telefone).split("@")[0]
+
+
+        if "-" in telefone_limpo:
+            print(f"Ignorando grupo: {telefone_limpo}", flush=True)
+            return jsonify({"status": "ok"})
 
         try:
-            # Tente imprimir o que está enviando para debugar
-            print(f"Enviando resposta para {telefone}...")
+            print(f"Enviando resposta para {telefone_limpo}...", flush=True)
 
-            response = requests.post(ZAPI_URL, json={
-                "phone": telefone,
-                "message": resposta
-            })
 
-            print(f"Status Z-API: {response.status_code} - {response.text}",flush=True)
+            token_seguranca = "65FB9421040863A98C3B5FAE"
+
+
+            headers = {
+                "Content-Type": "application/json",
+                "Client-Token": token_seguranca
+            }
+
+
+            response = requests.post(
+                ZAPI_URL,
+                json={
+                    "phone": telefone_limpo,
+                    "message": resposta
+                },
+                headers=headers  # <--- ESSA É A CHAVE!
+            )
+
+            print(f"Status Z-API: {response.status_code} - {response.text}", flush=True)
 
         except Exception as e:
-            print("❌ Erro ao enviar mensagem:", e,flush=True)
-
-    return jsonify({"status": "ok"})
+            print("❌ Erro ao enviar mensagem:", e, flush=True)
 
 
 if __name__ == "__main__":
