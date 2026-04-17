@@ -38,10 +38,11 @@ def webhook():
     else:
         resposta = "Não entendi 😅 Responda:\n[1] Agendamento\n[2] Dúvida"
 
-
     try:
+
         headers = {
             "Content-Type": "application/json",
+            "client-token": ZAPI_TOKEN,
             "Client-Token": ZAPI_TOKEN
         }
 
@@ -50,12 +51,16 @@ def webhook():
             "message": resposta
         }
 
-        print(f"Enviando para {telefone_limpo}...", flush=True)
-        response = requests.post(ZAPI_URL, json=payload, headers=headers)
+        print(f"Tentando enviar para {telefone_limpo}...", flush=True)
+
+
+        URL_ENVIO = f"https://api.z-api.io/instances/3F1B93ED5CDD8251D0D10E5C90DD1B0B/token/{ZAPI_TOKEN}/send-text"
+
+        response = requests.post(URL_ENVIO, json=payload, headers=headers)
         print(f"Status Z-API: {response.status_code} - {response.text}", flush=True)
 
     except Exception as e:
-        print(f"❌ Erro: {e}", flush=True)
+        print(f"❌ Erro na requisição: {e}", flush=True)
 
     return jsonify({"status": "ok"}), 200
 
