@@ -39,14 +39,13 @@ def webhook():
         resposta = "Não entendi 😅 Responda:\n[1] Agendamento\n[2] Dúvida"
 
     try:
-        # Coloque o TOKEN direto aqui para testar (sem espaços!)
-        MEU_TOKEN = "65FB9421040863A98C3B5FAE"
+        # 1. Use o seu token novo aqui (o que começa com Fbf...)
+        MEU_TOKEN = "Fbf300264fc57429db4b41a1a868b3249S"
 
-        # Headers com todas as variações que a API aceita
+        # 2. O Header PRECISA usar esse mesmo MEU_TOKEN
         headers = {
             "Content-Type": "application/json",
-            "client-token": MEU_TOKEN,
-            "Client-Token": MEU_TOKEN
+            "Client-Token": MEU_TOKEN  # Antes estava ZAPI_TOKEN (o antigo), agora corrigi
         }
 
         payload = {
@@ -54,7 +53,7 @@ def webhook():
             "message": resposta
         }
 
-        # URL com o token incluído nela também
+        # 3. A URL também usa o MEU_TOKEN
         url_final = f"https://api.z-api.io/instances/3F1B93ED5CDD8251D0D10E5C90DD1B0B/token/{MEU_TOKEN}/send-text"
 
         print(f"Tentando enviar para {telefone_limpo}...", flush=True)
