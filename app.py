@@ -39,11 +39,14 @@ def webhook():
         resposta = "Não entendi 😅 Responda:\n[1] Agendamento\n[2] Dúvida"
 
     try:
+        # Coloque o TOKEN direto aqui para testar (sem espaços!)
+        MEU_TOKEN = "65FB9421040863A98C3B5FAE"
 
+        # Headers com todas as variações que a API aceita
         headers = {
             "Content-Type": "application/json",
-            "client-token": ZAPI_TOKEN,
-            "Client-Token": ZAPI_TOKEN
+            "client-token": MEU_TOKEN,
+            "Client-Token": MEU_TOKEN
         }
 
         payload = {
@@ -51,16 +54,16 @@ def webhook():
             "message": resposta
         }
 
+        # URL com o token incluído nela também
+        url_final = f"https://api.z-api.io/instances/3F1B93ED5CDD8251D0D10E5C90DD1B0B/token/{MEU_TOKEN}/send-text"
+
         print(f"Tentando enviar para {telefone_limpo}...", flush=True)
 
-
-        URL_ENVIO = f"https://api.z-api.io/instances/3F1B93ED5CDD8251D0D10E5C90DD1B0B/token/{ZAPI_TOKEN}/send-text"
-
-        response = requests.post(URL_ENVIO, json=payload, headers=headers)
+        response = requests.post(url_final, json=payload, headers=headers)
         print(f"Status Z-API: {response.status_code} - {response.text}", flush=True)
 
     except Exception as e:
-        print(f"❌ Erro na requisição: {e}", flush=True)
+        print(f"❌ Erro fatal: {e}", flush=True)
 
     return jsonify({"status": "ok"}), 200
 
